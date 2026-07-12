@@ -108,13 +108,13 @@ class _ScreenSearchState extends State<ScreenSearch> {
                                     style: ButtonStyle(
                                       alignment: Alignment.centerLeft,
                                       backgroundColor:
-                                          MaterialStateProperty.all(
+                                          WidgetStateProperty.all(
                                               _controllerBible.lightMode.value
                                                   ? const Color.fromARGB(
                                                       0, 255, 255, 255)
                                                   : const Color.fromARGB(
                                                       0, 0, 0, 0)),
-                                      elevation: MaterialStateProperty.all(0.0),
+                                      elevation: WidgetStateProperty.all(0.0),
                                     ),
                                     onPressed: () {},
                                     onLongPress: () {},

@@ -1,9 +1,13 @@
 class Comment {
+  static const String tableName = "comments";
+  
   final int book;
   final int chapter;
   final int id;
   final String title;
   final String comment;
+
+  
   Comment({
     required this.id,
     required this.book,

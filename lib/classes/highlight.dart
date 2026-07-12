@@ -1,4 +1,7 @@
 class Highlight {
+
+  static const String tableName = "highlights";
+
   final int id;
   final int book;
   final int chapter;

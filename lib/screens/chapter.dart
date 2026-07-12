@@ -1,11 +1,10 @@
-import 'dart:math';
-
 import 'package:bible_chichewa/bible_chichewa.dart';
 import 'package:chichewa_bible/classes/comment.dart';
 import 'package:chichewa_bible/classes/highlight.dart';
+import 'package:chichewa_bible/classes/verse.dart';
 import 'package:chichewa_bible/controllers/bible.dart';
-import 'package:chichewa_bible/database/comments.dart';
-import 'package:chichewa_bible/database/highlights.dart';
+import 'package:chichewa_bible/controllers/comments.dart';
+import 'package:chichewa_bible/controllers/highlights.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
@@ -20,11 +19,14 @@ class ScreenChapter extends StatefulWidget {
 
 class _ScreenChapterState extends State<ScreenChapter> {
   final _controllerBible = Get.find<BibleController>();
-  final _commentTitle = TextEditingController();
+  final _controllerComments = Get.find<CommentController>();
+  final _controllerHighlights = Get.find<HighlightController>();
+
+  final _txtCommentTitle = TextEditingController();
   final _verseEnd = TextEditingController();
-  final _comment = TextEditingController();
+  final _txtCommentDescription = TextEditingController();
   var _highlights = <Highlight>[];
-  final _verses = <Map<String, dynamic>>[];
+  List<Verse> _verses = [];
 
   @override
   void initState() {
@@ -34,9 +36,9 @@ class _ScreenChapterState extends State<ScreenChapter> {
 
   @override
   void dispose() {
-    _commentTitle.dispose();
+    _txtCommentTitle.dispose();
     _verseEnd.dispose();
-    _comment.dispose();
+    _txtCommentDescription.dispose();
     super.dispose();
   }
 
@@ -50,6 +52,20 @@ class _ScreenChapterState extends State<ScreenChapter> {
   }
 
   void _onSettings() => Navigator.pushNamed(context, "/settings");
+
+  void _onPreviousChapter(int book, int chapter) {
+    if ((chapter - 1) < 1) {
+      // next book
+      if (book != BOOK.revelation.index) {
+        Navigator.popAndPushNamed(context, "/chapter",
+            arguments: [book + 1, 1]);
+      }
+    } else {
+      //chapter
+      Navigator.popAndPushNamed(context, "/chapter",
+          arguments: [book, chapter - 1]);
+    }
+  }
 
   void _onNextChapter(int book, int chapter) {
     var count = _controllerBible.bible.value.getChapterCount(BOOK.values[book]);
@@ -67,9 +83,9 @@ class _ScreenChapterState extends State<ScreenChapter> {
   }
 
   void _addComment(int book, int chapter, Comment? exists) {
-    var title = _commentTitle.text;
-    var text = _comment.text;
-    var id = exists == null ? Random().nextInt(2534) + 7203859 : exists.id;
+    var title = _txtCommentTitle.text;
+    var text = _txtCommentDescription.text;
+    var id = exists == null ? DateTime.now().millisecondsSinceEpoch : exists.id;
     var comment = Comment(
       id: id,
       book: book,
@@ -78,84 +94,113 @@ class _ScreenChapterState extends State<ScreenChapter> {
       comment: text,
     );
     if (exists == null) {
-      DatabaseComments.insertComment(comment);
+      _controllerComments.insertComment(comment);
     } else {
-      DatabaseComments.updateComment(comment);
+      _controllerComments.updateComment(id, comment);
     }
     Toast.show("Ndemanga idawonjezedwa");
   }
 
   void _onComment(int book, int chapter) {
-    DatabaseComments.getCommentFrom(book, chapter).then((comment) {
-      _commentTitle.text = comment == null ? "" : comment.title;
-      _comment.text = comment == null ? "" : comment.comment;
-      return showDialog(
-        context: context,
-        builder: (c) => AlertDialog(
-          title: const Text(
-            "Ndemanga (Comment)",
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.brown,
-            ),
-          ),
-          content: SizedBox(
-            width: 800,
-            child: Column(
-              children: [
-                Text(
-                    "${_controllerBible.bible.value.getBooks()[book]} $chapter"),
-                TextFormField(
-                  maxLength: 300,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: "Mutu wa Ndemanga",
-                  ),
-                  controller: _commentTitle,
-                ),
-                TextFormField(
-                  minLines: 1,
-                  maxLines: 10,
-                  maxLength: 5000,
-                  keyboardType: TextInputType.multiline,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: "Ndemanga",
-                  ),
-                  controller: _comment,
-                ),
-                ElevatedButton(
-                    style: ButtonStyle(
-                        backgroundColor:
-                            MaterialStateProperty.all(Colors.brown)),
-                    onPressed: () => _addComment(book, chapter, comment),
-                    child: const Text("Onjezani Ndemanga"))
-              ],
-            ),
+    var comments = _controllerComments.getComments(book, chapter);
+    Comment? comment;
+    if (comments.isNotEmpty) {
+      comment = comments[0];
+      _txtCommentTitle.text = comment.title;
+      _txtCommentDescription.text = comment.comment;
+    }
+
+    showDialog(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: const Text(
+          "Ndemanga (Comment)",
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.brown,
           ),
         ),
-      );
-    });
+        content: SizedBox(
+          width: 800,
+          // height: 400,
+          child: Column(
+            children: [
+              Text("${_controllerBible.bible.value.getBooks()[book]} $chapter"),
+              TextFormField(
+                maxLength: 300,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: "Mutu wa Ndemanga",
+                  labelText: "Mutu wa Ndemanga",
+                ),
+                controller: _txtCommentTitle,
+              ),
+              TextFormField(
+                minLines: 1,
+                maxLines: 10,
+                maxLength: 5000,
+                keyboardType: TextInputType.multiline,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: "Ndemanga",
+                  labelText: "Ndemanga",
+                ),
+                controller: _txtCommentDescription,
+              ),
+              const SizedBox(height: 10),
+              ListTile(
+                leading: const Icon(Icons.add, color: Colors.brown),
+                title: const Text(
+                  "Onjezani",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: const Text("Onjezani Ndemanga"),
+                onTap: () {
+                  _addComment(book, chapter, comment);
+                  Navigator.pop(c);
+                },
+              ),
+              comment != null
+                  ? ListTile(
+                      leading: const Icon(Icons.delete, color: Colors.brown),
+                      title: const Text(
+                        "Chotsa",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: const Text("Chotsa Ndemanga"),
+                      onTap: () {
+                        _controllerComments.deleteComment(comment!.id);
+                        Navigator.pop(c);
+                        Toast.show("Ndemanga ya chotsedwa!");
+                        _txtCommentTitle.text = "";
+                        _txtCommentDescription.text = "";
+                      },
+                    )
+                  : const SizedBox(height: 80),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _addHighlight(int b, int c, int v, String color) async {
-    var list = await DatabaseHighlights.getHighlists(b, c);
-    var h = list
-        .firstWhereOrNull((e) => e.book == b && e.chapter == c && e.verse == v);
-    if (h == null) {
-      DatabaseHighlights.insertHighlist(Highlight(
-          id: Random().nextInt(2534) + 7203859,
+    var existingHighlight = _controllerHighlights.getHighlight(b, c, v);
+
+    if (existingHighlight == null) {
+      _controllerHighlights.insertHighlight(Highlight(
+          id: DateTime.now().millisecondsSinceEpoch,
           book: b,
           chapter: c,
           verse: v,
-          start: -1,
-          end: -1,
+          start: 0,
+          end: 0,
           color: color));
     } else {
-      DatabaseHighlights.updateHighlight(
-        h.id,
+      _controllerHighlights.updateHighlight(
+        existingHighlight.id,
         Highlight(
-            id: h.id,
+            id: existingHighlight.id,
             book: b,
             chapter: c,
             verse: v,
@@ -164,19 +209,17 @@ class _ScreenChapterState extends State<ScreenChapter> {
             color: color),
       );
     }
-
-    list = await DatabaseHighlights.getHighlists(b, c);
-    setState(() => _highlights = list);
+    setState(() {
+      _highlights = _controllerHighlights.getHighlights(b, c);
+    });
     Toast.show('Highlighted');
   }
 
   void _deleteHighlight(int b, int c, int v) async {
-    var list = await DatabaseHighlights.getHighlists(b, c);
-    var h = list
-        .firstWhereOrNull((e) => e.book == b && e.chapter == c && e.verse == v);
-    if (h != null) DatabaseHighlights.deleteHighlight(h.id);
-    list = await DatabaseHighlights.getHighlists(b, c);
-    setState(() => _highlights = list);
+    _controllerHighlights.removeHighlight(b, c, v);
+    setState(() {
+      _highlights = _controllerHighlights.getHighlights(b, c);
+    });
     Toast.show('Highlight Removed');
   }
 
@@ -185,7 +228,7 @@ class _ScreenChapterState extends State<ScreenChapter> {
       context: context,
       builder: (c) => AlertDialog(
         title: Text(
-          "Add Highlight",
+          "Highlight Verse $v",
           style: TextStyle(
             fontSize: 16,
             color: Colors.brown[900],
@@ -208,7 +251,10 @@ class _ScreenChapterState extends State<ScreenChapter> {
                 Icons.circle,
                 color: Colors.blue,
               ),
-              onPressed: () => _addHighlight(b, chapter, v, 'blue'),
+              onPressed: () {
+                _addHighlight(b, chapter, v, 'blue');
+                Navigator.pop(c);
+              },
             ),
             IconButton(
               tooltip: "Orange Highlight",
@@ -216,7 +262,10 @@ class _ScreenChapterState extends State<ScreenChapter> {
                 Icons.circle,
                 color: Colors.orange,
               ),
-              onPressed: () => _addHighlight(b, chapter, v, 'orange'),
+              onPressed: () {
+                _addHighlight(b, chapter, v, 'orange');
+                Navigator.pop(c);
+              },
             ),
             IconButton(
               tooltip: "Green Highlight",
@@ -224,7 +273,10 @@ class _ScreenChapterState extends State<ScreenChapter> {
                 Icons.circle,
                 color: Colors.green,
               ),
-              onPressed: () => _addHighlight(b, chapter, v, 'green'),
+              onPressed: () {
+                _addHighlight(b, chapter, v, 'green');
+                Navigator.pop(c);
+              },
             ),
             IconButton(
               tooltip: "Purple Highlight",
@@ -232,7 +284,10 @@ class _ScreenChapterState extends State<ScreenChapter> {
                 Icons.circle,
                 color: Colors.purple,
               ),
-              onPressed: () => _addHighlight(b, chapter, v, 'purple'),
+              onPressed: () {
+                _addHighlight(b, chapter, v, 'purple');
+                Navigator.pop(c);
+              },
             )
           ],
         ),
@@ -240,9 +295,8 @@ class _ScreenChapterState extends State<ScreenChapter> {
     );
   }
 
-  Color? _getVerseHighlight(verse) {
-    var h =
-        _highlights.firstWhereOrNull((r) => r.verse == (verse['index'] as int));
+  Color? _getVerseHighlight(Verse verse) {
+    var h = _highlights.firstWhereOrNull((r) => r.verse == verse.verse);
     if (h == null) return null;
     if (_controllerBible.lightMode.value) {
       if (h.color == 'blue') return Colors.blue[50];
@@ -264,143 +318,267 @@ class _ScreenChapterState extends State<ScreenChapter> {
     final data = ModalRoute.of(context)!.settings.arguments as List<int>;
     final book = data[0];
     final chapter = data[1] + 1;
+    _controllerBible.bible.value
+        .getChapter(BOOK.values[book], chapter)
+        .then((verses) {
+      setState(() {
+        List<Verse> list = [];
+        for (var i = 0; i < verses.length; i++) {
+          list.add(Verse(
+            book: _controllerBible.bible.value.getBooks()[book],
+            chapter: chapter,
+            verse: i + 1,
+            text: verses[i],
+          ));
+        }
+        _verses = list;
+      });
+    });
 
     if (_verses.isEmpty) {
-      DatabaseHighlights.getHighlists(book, chapter)
-          .then((value) => setState(() => _highlights = value));
-
-      _controllerBible.bible.value
-          .getChapter(BOOK.values[book], chapter)
-          .then((list) => setState(() {
-                var index = 0;
-                for (var item in list) {
-                  _verses.add({"index": ++index, "verse": item});
-                }
-              }));
+      setState(() {
+        _highlights = _controllerHighlights.getHighlights(book, chapter);
+      });
     }
 
     return Obx(() => Scaffold(
           appBar: AppBar(
             title: Text(
-                "${_controllerBible.bible.value.getBooks()[book]} $chapter"),
+              "${_controllerBible.bible.value.getBooks()[book]} $chapter",
+              style: const TextStyle(color: Colors.white),
+            ),
             elevation: 8.0,
             backgroundColor: Colors.brown,
             actions: [
               IconButton(
                   onPressed: () => _controllerBible.toggleLightMode(),
-                  icon: const Icon(Icons.contrast)),
+                  icon: const Icon(
+                    Icons.contrast,
+                    color: Colors.white,
+                    size: 20,
+                  )),
               IconButton(
-                  onPressed: _onSettings, icon: const Icon(Icons.settings)),
-              IconButton(
-                  tooltip: "Ndemanga",
-                  onPressed: () => _onComment(book, chapter),
-                  icon: const Icon(Icons.comment)),
+                  onPressed: _onSettings,
+                  icon: const Icon(
+                    Icons.settings,
+                    color: Colors.white,
+                    size: 20,
+                  ))
             ],
           ),
-          body: Container(
-            color: _controllerBible.lightMode.value
-                ? Colors.white
-                : Colors.black87,
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  ..._verses
-                      .map((verse) => Padding(
-                            padding: const EdgeInsets.all(9.0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    (_verses.indexOf(verse) + 1).toString(),
-                                    style: TextStyle(
-                                        fontSize: 16.0,
-                                        fontWeight: FontWeight.bold,
-                                        color: _controllerBible.lightMode.value
-                                            ? Colors.brown
-                                            : Colors.brown[300]),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Column(
-                                    children: [
-                                      SelectableText(
-                                        verse['verse'],
-                                        textAlign: TextAlign.start,
+          body: SafeArea(
+            child: GestureDetector(
+              onHorizontalDragEnd: (DragEndDetails details) {
+                if (details.primaryVelocity != null &&
+                    details.primaryVelocity! < 0) {
+                  _onNextChapter(book, chapter - 1);
+                } else {
+                  _onPreviousChapter(book, chapter - 1);
+                }
+              },
+              child: Container(
+                color: _controllerBible.lightMode.value
+                    ? Colors.white
+                    : Colors.black87,
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      ..._verses
+                          .map((verse) => Padding(
+                                padding: const EdgeInsets.all(9.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          8.0, 0, 3.0, 0),
+                                      child: Text(
+                                        verse.verse.toString(),
                                         style: TextStyle(
-                                            backgroundColor:
-                                                _getVerseHighlight(verse),
-                                            fontSize:
-                                                _controllerBible.fontSize.value,
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.bold,
                                             color:
                                                 _controllerBible.lightMode.value
-                                                    ? Colors.grey
-                                                    : Colors.white),
+                                                    ? Colors.brown
+                                                    : Colors.brown[300]),
                                       ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          IconButton(
-                                              tooltip: "Share",
-                                              onPressed: () => _onShare(
-                                                  book,
-                                                  chapter,
-                                                  verse['index'] as int,
-                                                  verse['verse'] as String),
-                                              icon: const Icon(
-                                                Icons.share,
-                                                size: 16.0,
+                                    ),
+                                    Expanded(
+                                      child: InkWell(
+                                        onLongPress: () {
+                                          showModalBottomSheet(
+                                              context: context,
+                                              backgroundColor: Colors.white,
+                                              shape:
+                                                  const RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.vertical(
+                                                  top: Radius.circular(20.0),
+                                                ),
                                               ),
-                                              color: _controllerBible
-                                                      .lightMode.value
-                                                  ? Colors.brown
-                                                  : Colors.brown[50]),
-                                          IconButton(
-                                              tooltip: "Highlight",
-                                              onPressed: () => _onHighlight(
-                                                  book,
-                                                  chapter,
-                                                  verse['index'] as int),
-                                              icon: const Icon(
-                                                Icons.edit,
-                                                size: 16.0,
+                                              // Critical for preventing content from overflowing and hiding the rounded corners
+                                              clipBehavior:
+                                                  Clip.antiAliasWithSaveLayer,
+                                              builder: (context) => Container(
+                                                    color: _controllerBible
+                                                            .lightMode.value
+                                                        ? Colors.white
+                                                        : Colors.black87,
+                                                    child: Column(
+                                                      children: [
+                                                        ListTile(
+                                                          title: Text("Zochita",
+                                                              style: TextStyle(
+                                                                  color: _controllerBible
+                                                                          .lightMode
+                                                                          .value
+                                                                      ? Colors
+                                                                          .brown
+                                                                          .shade800
+                                                                      : Colors
+                                                                          .white)),
+                                                          subtitle: const Text(
+                                                              "What do you want to do?",
+                                                              style: TextStyle(
+                                                                  color: Colors
+                                                                      .grey)),
+                                                        ),
+                                                        const Padding(
+                                                          padding: EdgeInsets
+                                                              .fromLTRB(
+                                                                  8.0,
+                                                                  3.0,
+                                                                  8.0,
+                                                                  3.0),
+                                                          child: Divider(),
+                                                        ),
+                                                        ListTile(
+                                                          onTap: () => _onShare(
+                                                              book,
+                                                              chapter,
+                                                              verse.verse,
+                                                              verse.text),
+                                                          leading: Icon(
+                                                              Icons.share,
+                                                              color: _controllerBible
+                                                                      .lightMode
+                                                                      .value
+                                                                  ? Colors.brown
+                                                                  : Colors.brown[
+                                                                      300]),
+                                                          title: Text(
+                                                              "Gawa Mau",
+                                                              style: TextStyle(
+                                                                  color: _controllerBible
+                                                                          .lightMode
+                                                                          .value
+                                                                      ? Colors
+                                                                          .brown
+                                                                          .shade800
+                                                                      : Colors
+                                                                          .white)),
+                                                          subtitle: const Text(
+                                                              "Share Verse",
+                                                              style: TextStyle(
+                                                                  color: Colors
+                                                                      .grey)),
+                                                        ),
+                                                        ListTile(
+                                                          onTap: () =>
+                                                              _onHighlight(
+                                                                  book,
+                                                                  chapter,
+                                                                  verse.verse),
+                                                          leading: Icon(
+                                                              Icons
+                                                                  .color_lens_rounded,
+                                                              color: _controllerBible
+                                                                      .lightMode
+                                                                      .value
+                                                                  ? Colors.brown
+                                                                  : Colors.brown[
+                                                                      300]),
+                                                          title: Text(
+                                                              "Highlight",
+                                                              style: TextStyle(
+                                                                  color: _controllerBible
+                                                                          .lightMode
+                                                                          .value
+                                                                      ? Colors
+                                                                          .brown
+                                                                          .shade800
+                                                                      : Colors
+                                                                          .white)),
+                                                          subtitle: const Text(
+                                                              "Highlight verse",
+                                                              style: TextStyle(
+                                                                  color: Colors
+                                                                      .grey)),
+                                                        ),
+                                                        ListTile(
+                                                          onTap: () =>
+                                                              _onComment(book,
+                                                                  chapter),
+                                                          leading: Icon(
+                                                              Icons
+                                                                  .edit_document,
+                                                              color: _controllerBible
+                                                                      .lightMode
+                                                                      .value
+                                                                  ? Colors.brown
+                                                                  : Colors.brown[
+                                                                      300]),
+                                                          title: Text(
+                                                              "Ndemanga",
+                                                              style: TextStyle(
+                                                                  color: _controllerBible
+                                                                          .lightMode
+                                                                          .value
+                                                                      ? Colors
+                                                                          .brown
+                                                                          .shade800
+                                                                      : Colors
+                                                                          .white)),
+                                                          subtitle: const Text(
+                                                              "Write a comment",
+                                                              style: TextStyle(
+                                                                  color: Colors
+                                                                      .grey)),
+                                                        )
+                                                      ],
+                                                    ),
+                                                  ));
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Column(
+                                            children: [
+                                              SelectableText(
+                                                verse.text,
+                                                textAlign: TextAlign.start,
+                                                style: TextStyle(
+                                                    backgroundColor:
+                                                        _getVerseHighlight(
+                                                            verse),
+                                                    fontSize: _controllerBible
+                                                        .fontSize.value,
+                                                    color: _controllerBible
+                                                            .lightMode.value
+                                                        ? Colors.grey
+                                                        : Colors.white),
                                               ),
-                                              color: _controllerBible
-                                                      .lightMode.value
-                                                  ? Colors.brown
-                                                  : Colors.brown[50])
-                                        ],
-                                      )
-                                    ],
-                                  ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ))
-                      .toList(),
-                  Padding(
-                    padding: const EdgeInsets.all(38.0),
-                    child: ElevatedButton(
-                        style: ButtonStyle(
-                          backgroundColor:
-                              MaterialStateProperty.all(Colors.brown),
-                        ),
-                        onPressed: () => _onNextChapter(book, chapter),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Zosatira",
-                              style: TextStyle(
-                                  color: Colors.white, fontSize: 18.0),
-                            ),
-                            Icon(Icons.navigate_next)
-                          ],
-                        )),
-                  )
-                ],
+                              ))
+                          .toList(),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),

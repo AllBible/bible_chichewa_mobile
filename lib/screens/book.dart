@@ -11,13 +11,11 @@ class ScreenBook extends StatefulWidget {
 }
 
 class _ScreenBookState extends State<ScreenBook> {
-  
   final _controllerBible = Get.find<BibleController>();
 
   void _onChapter(BOOK book, int chapter) =>
       Navigator.pushNamed(context, "/chapter",
           arguments: [book.index, chapter]);
-
 
   void _onSettings() => Navigator.pushNamed(context, "/settings");
 
@@ -28,7 +26,10 @@ class _ScreenBookState extends State<ScreenBook> {
     return Obx(
       () => Scaffold(
         appBar: AppBar(
-          title: Text(_controllerBible.bible.value.getBooks()[book.index]),
+          title: Text(
+            _controllerBible.bible.value.getBooks()[book.index],
+            style: const TextStyle(color: Colors.white),
+          ),
           elevation: 8.0,
           backgroundColor: Colors.brown,
           actions: [
@@ -39,35 +40,37 @@ class _ScreenBookState extends State<ScreenBook> {
                 onPressed: _onSettings, icon: const Icon(Icons.settings)),
           ],
         ),
-        body: Container(
-          color:
-              _controllerBible.lightMode.value ? Colors.white : Colors.black87,
-          child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 5,
-                  crossAxisSpacing: 2.0,
-                  mainAxisSpacing: 1.0,
-                  mainAxisExtent: 60.0),
-              itemCount: _controllerBible.bible.value
-                  .getChapterCount(book), // Number of items in the grid
-              itemBuilder: (BuildContext context, int index) {
-                return ElevatedButton(
-                  onPressed: () => _onChapter(book, index),
-                  style: ButtonStyle(
-                      elevation: MaterialStateProperty.all(0.0),
-                      backgroundColor: MaterialStateProperty.all(
-                          _controllerBible.lightMode.value
-                              ? Colors.white
-                              : Colors.black87)),
-                  child: Text((index + 1).toString(),
-                      style: TextStyle(
-                          color: _controllerBible.lightMode.value
-                              ? Colors.grey
-                              : Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: _controllerBible.fontSize.value)),
-                );
-              }),
+        body: SafeArea(
+          child: Container(
+            color:
+                _controllerBible.lightMode.value ? Colors.white : Colors.black87,
+            child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 5,
+                    crossAxisSpacing: 2.0,
+                    mainAxisSpacing: 1.0,
+                    mainAxisExtent: 60.0),
+                itemCount: _controllerBible.bible.value
+                    .getChapterCount(book), // Number of items in the grid
+                itemBuilder: (BuildContext context, int index) {
+                  return ElevatedButton(
+                    onPressed: () => _onChapter(book, index),
+                    style: ButtonStyle(
+                        elevation: WidgetStateProperty.all(0.0),
+                        backgroundColor: WidgetStateProperty.all(
+                            _controllerBible.lightMode.value
+                                ? Colors.white
+                                : Colors.black87)),
+                    child: Text((index + 1).toString(),
+                        style: TextStyle(
+                            color: _controllerBible.lightMode.value
+                                ? Colors.grey
+                                : Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: _controllerBible.fontSize.value)),
+                  );
+                }),
+          ),
         ),
       ),
     );

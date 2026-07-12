@@ -18,11 +18,16 @@ class _ScreenSettingsState extends State<ScreenSettings> {
       () => Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.brown,
-          title: const Text("Settings"),
+          title: const Text(
+            "Settings",
+            style: TextStyle(color: Colors.white),
+          ),
         ),
         body: Container(
-          color:
-              _controllerBible.lightMode.value ? Colors.white : Colors.black87,
+          height: MediaQuery.of(context).size.height,
+          color: _controllerBible.lightMode.value
+              ? Colors.white
+              : Colors.black87,
           child: SingleChildScrollView(
               child: Padding(
             padding: const EdgeInsets.all(16.0),

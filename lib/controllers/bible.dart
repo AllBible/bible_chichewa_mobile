@@ -1,16 +1,14 @@
 import 'package:bible_chichewa/bible_chichewa.dart';
-import 'package:chichewa_bible/classes/verse.dart';
-import 'package:flutter/material.dart';
+import 'package:chichewa_bible/classes/verse.dart'; 
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BibleController extends GetxController {
+
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   final bible = Bible().obs;
-  var fontSize = 18.0.obs;
-  var lightMode = true.obs;
-  var comments = [].obs;
-  var highlights = [].obs;
+  var fontSize = 16.0.obs;
+  var lightMode = false.obs; 
 
   Future load() async => await bible.value.init();
 
@@ -35,11 +33,7 @@ class BibleController extends GetxController {
     lightMode.value = light;
     fontSize.value = font;
   }
-
-  void addComment(BuildContext context, String? v1, String? v2, String? c) {
-    
-  }
-
+ 
   Future<List<Verse>> searchText(String query) async {
     final verses = <Verse>[];
     for (var b = 0; b < bible.value.getBooks().length; b++) {
