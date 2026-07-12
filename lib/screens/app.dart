@@ -24,7 +24,6 @@ class _ScreenAppState extends State<ScreenApp> {
   final _controllerHighlights = Get.put(HighlightController());
 
   Map<int, int?> _mapHighlights = {};
-  Map<int, int?> _mapComments = {};
   // Map<int, int> _highlights = {};
 
   var _loading = true;
@@ -43,7 +42,6 @@ class _ScreenAppState extends State<ScreenApp> {
     _controllerComments.load(db);
 
     setState(() {
-      _mapComments = _controllerComments.getBibleCommentCount();
       _mapHighlights = _controllerHighlights.getBibleHighlightCount();
     });
 
