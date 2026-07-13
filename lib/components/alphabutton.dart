@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-class DialButton extends StatelessWidget {
+class AlphaButton extends StatelessWidget {
   final VoidCallback onPressed;
-  final int number;
+  final IconData icon;
   final double padding = 20;
-  const DialButton({super.key, required this.onPressed, required this.number});
+  const AlphaButton({super.key, required this.onPressed, required this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -13,20 +13,12 @@ class DialButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
+          backgroundColor: Colors.brown,
           shadowColor: Colors.transparent,
           padding: EdgeInsets.fromLTRB(0, padding, 0, padding),
           side: const BorderSide(width: 2, color: Colors.brown),
         ),
-        child: Text(
-          number.toString(),
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.brown,
-          ),
-        ),
+        child: Icon(icon, color: Colors.white),
       ),
     );
   }

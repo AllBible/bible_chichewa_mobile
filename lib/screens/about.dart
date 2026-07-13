@@ -4,7 +4,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ScreenAboutUs extends StatelessWidget {
-  const ScreenAboutUs({Key? key}) : super(key: key);
+  const ScreenAboutUs({super.key});
   final _iconSize = 40.0;
 
   void _loadUrl(String url) async {
@@ -13,9 +13,9 @@ class ScreenAboutUs extends StatelessWidget {
     }
   }
 
-  void _onShare() => Share.share(
-      'Khalani Wodalitsidwa ndi Mawu a Mulungu\nhttps://play.google.com/store/apps/details?id=com.m2kdevelopments.biblechichewa',
-      subject: 'Chichewa Bible - Mawu a Mulungu');
+  void _onShare() => SharePlus.instance.share(ShareParams(
+      text: 'Khalani Wodalitsidwa ndi Mawu a Mulungu\nhttps://play.google.com/store/apps/details?id=com.m2kdevelopments.biblechichewa',
+      subject: 'Chichewa Bible - Mawu a Mulungu'));
 
   @override
   Widget build(BuildContext context) {

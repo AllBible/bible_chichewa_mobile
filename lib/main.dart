@@ -1,11 +1,9 @@
 import 'package:chichewa_bible/screens/about.dart';
 import 'package:chichewa_bible/screens/app.dart';
-import 'package:chichewa_bible/screens/book.dart';
 import 'package:chichewa_bible/screens/chapter.dart';
 import 'package:chichewa_bible/screens/search.dart';
 import 'package:chichewa_bible/screens/settings.dart';
 import 'package:flutter/material.dart';
-
 
 void main() {
   runApp(const MyApp());
@@ -29,7 +27,6 @@ class MyApp extends StatelessWidget {
         '/search': (context) => const ScreenSearch(),
         '/settings': (context) => const ScreenSettings(),
         '/chapter': (context) => const ScreenChapter(),
-        '/book': (context) => const ScreenBook()
       },
     );
   }

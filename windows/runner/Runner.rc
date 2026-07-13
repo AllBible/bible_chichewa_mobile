@@ -93,7 +93,7 @@ BEGIN
             VALUE "FileDescription", "chichewa_bible" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "chichewa_bible" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2023 com.m2kdevelopments.biblechichewa. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.m2kdevelopments.biblechichewa. All rights reserved." "\0"
             VALUE "OriginalFilename", "chichewa_bible.exe" "\0"
             VALUE "ProductName", "chichewa_bible" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
