@@ -315,27 +315,29 @@ class _ScreenAppState extends State<ScreenApp> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 20),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.brown,
-                              ),
-                              onPressed: () => _onChapter(
-                                bookIndex,
-                                _chapterNumber,
-                                context,
-                              ),
-                              child: const Text(
-                                "Werenga / Read",
-                                style: TextStyle(color: Colors.white),
+                            Expanded(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.brown,
+                                ),
+                                onPressed: () => _onChapter(
+                                  bookIndex,
+                                  _chapterNumber,
+                                  context,
+                                ),
+                                child: const Text(
+                                  "Werenga / Read",
+                                  style: TextStyle(color: Colors.white),
+                                ),
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 60),
+                        const SizedBox(height: 50),
                       ],
                     ),
                   ),
@@ -350,8 +352,7 @@ class _ScreenAppState extends State<ScreenApp> {
   }
 
   void _onAbout() {
-
-  Navigator.pushNamed(context, "/about");
+    Navigator.pushNamed(context, "/about");
   }
 
   void _onSearch(BuildContext context) {
