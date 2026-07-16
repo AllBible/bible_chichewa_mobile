@@ -44,7 +44,7 @@ class WidgetSearchMenu extends SearchDelegate {
     return ListView.builder(
       itemCount: matchQuery.length,
       itemBuilder: (context, index) => ListTile(
-        leading: index == 0 ? null : Icon(Icons.book),
+        leading: index == 0 ? null : Icon(Icons.book, color: Colors.brown,),
         title: index == 0
             ? Row(children: [const Icon(Icons.search), Text(matchQuery[index])])
             : Text(matchQuery[index]),
@@ -64,7 +64,7 @@ class WidgetSearchMenu extends SearchDelegate {
     return ListView.builder(
       itemCount: matchQuery.length,
       itemBuilder: (context, index) => ListTile(
-        leading: index == 0 ? null : Icon(Icons.book),
+        leading: index == 0 ? null : Icon(Icons.book, color: Colors.brown,),
         title: index == 0
             ? Row(children: [const Icon(Icons.search), Text(matchQuery[index])])
             : Text(matchQuery[index]),

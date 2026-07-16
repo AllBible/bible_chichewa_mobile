@@ -18,6 +18,8 @@ class ScreenChapter extends StatefulWidget {
 }
 
 class _ScreenChapterState extends State<ScreenChapter> {
+
+  
   final _controllerBible = Get.find<BibleController>();
   final _controllerComments = Get.find<CommentController>();
   final _controllerHighlights = Get.find<HighlightController>();
@@ -347,8 +349,12 @@ class _ScreenChapterState extends State<ScreenChapter> {
             "${_controllerBible.bible.value.getBooks()[book]} $chapter",
             style: const TextStyle(color: Colors.white),
           ),
-          elevation: 8.0,
           backgroundColor: Colors.brown,
+          elevation: 16.0,
+          shadowColor: _controllerBible.lightMode.value
+              ? Colors.black
+              : Colors.brown.shade400, // Required to show shadow in M3
+          surfaceTintColor: Colors.transparent, // Suppresses M3 tint
           actions: [
             IconButton(
               onPressed: () => _controllerBible.toggleLightMode(),
@@ -381,7 +387,7 @@ class _ScreenChapterState extends State<ScreenChapter> {
                   return ListTile(
                     onLongPress: () {
                       showModalBottomSheet(
-                        context: context, 
+                        context: context,
                         backgroundColor: Colors.white,
                         shape: const RoundedRectangleBorder(
                           borderRadius: BorderRadius.vertical(
@@ -519,7 +525,6 @@ class _ScreenChapterState extends State<ScreenChapter> {
                       ],
                     ),
                   );
-                   
                 },
               ),
             ),

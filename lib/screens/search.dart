@@ -35,6 +35,11 @@ class _ScreenSearchState extends State<ScreenSearch> {
       () => Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.brown,
+          elevation: 16.0,
+          shadowColor: _controllerBible.lightMode.value
+              ? Colors.black
+              : Colors.brown.shade400, // Required to show shadow in M3
+          surfaceTintColor: Colors.transparent, // Suppresses M3 tint
           title: Text("Fufuzani", style: TextStyle(color: Colors.white)),
           actions: [
             IconButton(

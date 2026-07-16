@@ -20,12 +20,14 @@ class ScreenApp extends StatefulWidget {
 }
 
 class _ScreenAppState extends State<ScreenApp> {
+
+  
   final _controllerBible = Get.put(BibleController());
   final _controllerComments = Get.put(CommentController());
   final _controllerHighlights = Get.put(HighlightController());
 
   Map<int, int?> _mapHighlights = {};
-  // Map<int, int> _highlights = {};
+  Map<int, int> _mapComments = {};
 
   var _loading = true;
 
@@ -57,9 +59,10 @@ class _ScreenAppState extends State<ScreenApp> {
     _controllerHighlights.load(db);
     _controllerComments.load(db);
 
-    setState(
-      () => _mapHighlights = _controllerHighlights.getBibleHighlightCount(),
-    );
+    setState(() {
+      _mapHighlights = _controllerHighlights.getBibleHighlightCount();
+      _mapComments = _controllerComments.getBibleCommentCount();
+    });
 
     _controllerBible.load().then((value) => setState(() => _loading = false));
   }
@@ -130,9 +133,10 @@ class _ScreenAppState extends State<ScreenApp> {
                               fontSize: _controllerBible.fontSize.value,
                             ),
                           ),
-                          leading: const Icon(
+                          leading: Icon(
                             Icons.book,
-                            color: Color.fromARGB(255, 226, 187, 161),
+                            color: Colors.brown,
+                            size: 40,
                           ),
                         ),
                         Row(
@@ -396,7 +400,12 @@ class _ScreenAppState extends State<ScreenApp> {
                   "Buku Lopatulika",
                   style: TextStyle(color: Colors.white),
                 ),
-                elevation: 8.0,
+                elevation: 16.0,
+                shadowColor: _controllerBible.lightMode.value
+                    ? Colors.black
+                    : Colors.brown.shade400, // Required to show shadow in M3
+                surfaceTintColor: Colors.transparent, // Suppresses M3 tint
+
                 backgroundColor: Colors.brown,
                 actions: [
                   IconButton(
@@ -424,7 +433,7 @@ class _ScreenAppState extends State<ScreenApp> {
               body: SafeArea(
                 child: Container(
                   color: _controllerBible.lightMode.value
-                      ? Colors.white
+                      ? Colors.grey[200]
                       : Colors.black87,
                   child: GridView.builder(
                     gridDelegate:
@@ -474,22 +483,29 @@ class _ScreenAppState extends State<ScreenApp> {
                               fontSize: _controllerBible.fontSize.value,
                             ),
                           ),
-                          trailing: Badge(
-                            backgroundColor: Colors.pink,
-                            child: Text(
-                              _mapHighlights[index]?.toString() ?? "0",
-                              style: TextStyle(
-                                color: _controllerBible.lightMode.value
-                                    ? Colors.grey
-                                    : Colors.white,
-                                fontSize: 16,
-                              ),
+                          trailing: Text(
+                            _mapComments[index]?.toString() ?? "0",
+                            style: TextStyle(
+                              color: _controllerBible.lightMode.value
+                                  ? Colors.grey
+                                  : Colors.white,
+                              fontSize: 17,
                             ),
                           ),
-                          leading: const Icon(
-                            Icons.book,
-                            color: Color.fromARGB(255, 226, 187, 161),
-                          ),
+                          leading:
+                              _mapHighlights[index] == null ||
+                                  _mapHighlights[index] == 0
+                              ? Icon(Icons.book, color: Colors.brown.shade400)
+                              : Badge(
+                                  backgroundColor: Colors.amber,
+                                  label: Text(
+                                    _mapHighlights[index]?.toString() ?? "0",
+                                  ),
+                                  child: Icon(
+                                    Icons.book,
+                                    color: Colors.brown.shade400,
+                                  ),
+                                ),
                         ),
                       );
                     },
