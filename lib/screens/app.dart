@@ -333,7 +333,7 @@ class _ScreenAppState extends State<ScreenApp> {
                                   _chapterNumber,
                                   context,
                                 ),
-                                icon: const Icon(Icons.read_more),
+                                icon: const Icon(Icons.read_more, color:Colors.white),
                                 label: const Text(
                                   "Werenga / Read",
                                   style: TextStyle(color: Colors.white),

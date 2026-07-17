@@ -20,6 +20,9 @@ class MyApp extends StatelessWidget {
       // Start the app with the "/" named route. In this case, the app starts
       // on the FirstScreen widget.
       initialRoute: '/',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.brown),
+      ),
       routes: {
         // When navigating to the "/" route, build the FirstScreen widget.
         '/': (context) => const ScreenApp(),
