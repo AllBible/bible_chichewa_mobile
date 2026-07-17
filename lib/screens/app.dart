@@ -324,7 +324,7 @@ class _ScreenAppState extends State<ScreenApp> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             Expanded(
-                              child: ElevatedButton(
+                              child: ElevatedButton.icon(
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.brown,
                                 ),
@@ -333,7 +333,8 @@ class _ScreenAppState extends State<ScreenApp> {
                                   _chapterNumber,
                                   context,
                                 ),
-                                child: const Text(
+                                icon: const Icon(Icons.read_more),
+                                label: const Text(
                                   "Werenga / Read",
                                   style: TextStyle(color: Colors.white),
                                 ),
